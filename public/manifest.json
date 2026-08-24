@@ -1,0 +1,13 @@
+{
+  "name": "CarMeet",
+  "short_name": "CarMeet",
+  "description": "Find and organize local car meets.",
+  "start_url": "/map",
+  "display": "standalone",
+  "background_color": "#0c0c0e",
+  "theme_color": "#ff5a1f",
+  "icons": [
+    { "src": "/icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icons/icon-512.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
