@@ -111,18 +111,22 @@ export default function MapScreen() {
   const selectedMeet = meets.find((m) => m.id === selectedMeetId) ?? null;
 
   return (
-    <div className="relative h-[calc(100dvh-5rem)] w-full overflow-hidden">
-      <MapView
-        center={location}
-        meets={visibleMeets}
-        rsvpMeetIds={myMeetIds}
-        selectedMeetId={selectedMeetId}
-        onSelectMeet={setSelectedMeetId}
-        radiusMeters={radiusMeters}
-      />
+    <div className="relative isolate h-[calc(100dvh-5rem)] w-full overflow-hidden">
+      {/* Keep the map in its own stacking context so Leaflet/Mapbox panes can
+          never render over the fixed map controls. */}
+      <div className="absolute inset-0 z-0">
+        <MapView
+          center={location}
+          meets={visibleMeets}
+          rsvpMeetIds={myMeetIds}
+          selectedMeetId={selectedMeetId}
+          onSelectMeet={setSelectedMeetId}
+          radiusMeters={radiusMeters}
+        />
+      </div>
 
-      {/* Top controls */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex flex-col gap-2 p-3">
+      {/* Fixed map header — remains above the map for this entire tab. */}
+      <div className="pointer-events-none fixed inset-x-0 top-0 z-40 flex flex-col gap-2 p-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
         <div className="pointer-events-auto flex items-center gap-2">
           <button
             onClick={() => setSearchOpen(true)}
@@ -137,17 +141,14 @@ export default function MapScreen() {
           <FilterChips active={filters} onToggle={toggleFilter} />
         </div>
         {profile && <PushOptInBanner profileId={profile.id} />}
+        <Link
+          href="/my-meets"
+          className="pointer-events-auto self-end flex items-center gap-1.5 rounded-full border border-border bg-surface px-3.5 py-2 text-xs font-semibold shadow-sm"
+        >
+          <CalendarCheck size={14} />
+          My meets
+        </Link>
       </div>
-
-      {/* My meets shortcut */}
-      <Link
-        href="/my-meets"
-        className="pointer-events-auto absolute right-3 z-20 flex items-center gap-1.5 rounded-full border border-border bg-surface px-3.5 py-2 text-xs font-semibold shadow-sm"
-        style={{ top: "7.5rem" }}
-      >
-        <CalendarCheck size={14} />
-        My meets
-      </Link>
 
       {loading && meets.length === 0 && (
         <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
