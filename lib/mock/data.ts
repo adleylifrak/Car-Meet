@@ -1,6 +1,5 @@
 import type {
   AppNotification,
-  Badge,
   Car,
   Checkin,
   Meet,
@@ -188,14 +187,6 @@ export const mockCheckins: Checkin[] = [
   { id: "ch1", meet_id: "m-past-1", profile_id: MOCK_SELF_ID, photo_url: "", submitted_at: hoursFromNow(-24 * 6 + 1) },
   { id: "ch2", meet_id: "m-past-1", profile_id: "p-mika", photo_url: "", submitted_at: hoursFromNow(-24 * 6 + 1.2) },
   { id: "ch3", meet_id: "m-past-2", profile_id: "p-dre", photo_url: "", submitted_at: hoursFromNow(-24 * 20 + 1) },
-];
-
-export const mockBadges: Badge[] = [
-  { profile_id: MOCK_SELF_ID, badge_type: "5", earned_at: hoursFromNow(-2000) },
-  { profile_id: MOCK_SELF_ID, badge_type: "10", earned_at: hoursFromNow(-500) },
-  { profile_id: "p-mika", badge_type: "5", earned_at: hoursFromNow(-3000) },
-  { profile_id: "p-mika", badge_type: "10", earned_at: hoursFromNow(-2500) },
-  { profile_id: "p-mika", badge_type: "25", earned_at: hoursFromNow(-1500) },
 ];
 
 export const mockNotifications: AppNotification[] = [

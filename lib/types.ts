@@ -5,7 +5,6 @@
 export type RsvpStatus = "interested" | "going" | "spectating";
 export type Recurrence = "weekly" | "monthly" | null;
 export type ReportTargetType = "photo" | "profile";
-export type BadgeType = "5" | "10" | "25" | "50" | "100";
 
 export interface Profile {
   id: string;
@@ -95,12 +94,6 @@ export interface Report {
   target_id: string;
   reason: string;
   created_at: string;
-}
-
-export interface Badge {
-  profile_id: string;
-  badge_type: BadgeType;
-  earned_at: string;
 }
 
 export interface AppNotification {

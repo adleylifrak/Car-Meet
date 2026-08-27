@@ -106,11 +106,17 @@ export default function MeetDetailScreen({ meetId }: { meetId: string }) {
         {meet.description && <p className="text-sm leading-relaxed">{meet.description}</p>}
 
         {meet.gallery_urls.length > 0 && (
-          <div className="no-scrollbar flex gap-2 overflow-x-auto">
-            {meet.gallery_urls.map((url, i) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img key={i} src={url} alt="" className="h-32 w-44 shrink-0 rounded-xl object-cover" />
-            ))}
+          <div>
+            <div className="mb-2">
+              <p className="text-sm font-semibold">Host photos</p>
+              <p className="text-xs text-muted">Parking, entry points, and meet details</p>
+            </div>
+            <div className="no-scrollbar flex gap-2 overflow-x-auto">
+              {meet.gallery_urls.map((url, i) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img key={i} src={url} alt="" className="h-32 w-44 shrink-0 rounded-xl object-cover" />
+              ))}
+            </div>
           </div>
         )}
 
@@ -134,7 +140,10 @@ export default function MeetDetailScreen({ meetId }: { meetId: string }) {
 
         <div>
           <div className="mb-3 flex items-center justify-between">
-            <p className="text-sm font-semibold">Check-in collage</p>
+            <div>
+              <p className="text-sm font-semibold">Attendee collage</p>
+              <p className="text-xs text-muted">Photos submitted during this meet</p>
+            </div>
             <span className="text-xs text-muted">{collage.length} check-ins</span>
           </div>
           {profile && (

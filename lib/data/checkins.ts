@@ -1,18 +1,6 @@
 import { hasSupabaseConfig } from "@/lib/supabase/client";
-import type { BadgeType, CheckinWithProfile } from "@/lib/types";
-import { mockBadges, mockCheckins, mockProfiles } from "@/lib/mock/data";
-
-const MILESTONES: BadgeType[] = ["5", "10", "25", "50", "100"];
-
-/** Mirrors the "award badges when meets_attended_count crosses a milestone"
- * Postgres trigger (see supabase/migrations) for the mock data path. */
-function awardBadgesIfCrossed(profileId: string, count: number) {
-  for (const m of MILESTONES) {
-    if (count >= Number(m) && !mockBadges.some((b) => b.profile_id === profileId && b.badge_type === m)) {
-      mockBadges.push({ profile_id: profileId, badge_type: m, earned_at: new Date().toISOString() });
-    }
-  }
-}
+import type { CheckinWithProfile } from "@/lib/types";
+import { mockCheckins, mockProfiles } from "@/lib/mock/data";
 
 function toCheckinWithProfile(c: (typeof mockCheckins)[number]): CheckinWithProfile {
   const profile = mockProfiles.find((p) => p.id === c.profile_id)!;
@@ -60,7 +48,6 @@ export async function submitCheckin(params: {
     const profile = mockProfiles.find((p) => p.id === params.profileId);
     if (profile) {
       profile.meets_attended_count += 1;
-      awardBadgesIfCrossed(profile.id, profile.meets_attended_count);
     }
     return { ok: true };
   }
@@ -78,7 +65,11 @@ export async function submitCheckin(params: {
 export async function removeCheckin(checkinId: string): Promise<void> {
   if (!hasSupabaseConfig) {
     const idx = mockCheckins.findIndex((c) => c.id === checkinId);
-    if (idx >= 0) mockCheckins.splice(idx, 1);
+    if (idx >= 0) {
+      const [removed] = mockCheckins.splice(idx, 1);
+      const profile = mockProfiles.find((p) => p.id === removed.profile_id);
+      if (profile) profile.meets_attended_count = Math.max(0, profile.meets_attended_count - 1);
+    }
     return;
   }
   const { createClient } = await import("@/lib/supabase/client");

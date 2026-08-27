@@ -1,7 +1,6 @@
 import { hasSupabaseConfig } from "@/lib/supabase/client";
-import type { Badge, Car, Profile } from "@/lib/types";
+import type { Car, Profile } from "@/lib/types";
 import {
-  mockBadges,
   mockCars,
   mockFollows,
   mockProfiles,
@@ -107,21 +106,6 @@ export async function getGarage(profileId: string): Promise<Car[]> {
     .select("*")
     .eq("profile_id", profileId)
     .order("is_primary", { ascending: false });
-  if (error) throw error;
-  return data ?? [];
-}
-
-export async function getBadges(profileId: string): Promise<Badge[]> {
-  if (!hasSupabaseConfig) {
-    return mockBadges.filter((b) => b.profile_id === profileId);
-  }
-  const { createClient } = await import("@/lib/supabase/client");
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from("badges")
-    .select("*")
-    .eq("profile_id", profileId)
-    .order("earned_at", { ascending: true });
   if (error) throw error;
   return data ?? [];
 }

@@ -27,6 +27,10 @@ interface NearbyMeetRow {
   host_avatar_url: string | null;
 }
 
+type MeetWithHostRow = Omit<NearbyMeetRow, "host_username" | "host_avatar_url"> & {
+  host: MeetWithHost["host"];
+};
+
 function toMeetWithHost(meet: Meet): MeetWithHost {
   const host = mockProfiles.find((p) => p.id === meet.host_id);
   return {
@@ -111,6 +115,41 @@ export async function getMeetById(id: string): Promise<MeetWithHost | null> {
     created_at: data.created_at,
     host: data.host as unknown as MeetWithHost["host"],
   };
+}
+
+/** Fetches saved meets regardless of browse radius so every RSVP stays pinned. */
+export async function getMeetsByIds(ids: string[]): Promise<MeetWithHost[]> {
+  if (ids.length === 0) return [];
+  if (!hasSupabaseConfig) {
+    const wanted = new Set(ids);
+    return mockMeets.filter((meet) => wanted.has(meet.id)).map(toMeetWithHost);
+  }
+
+  const { createClient } = await import("@/lib/supabase/client");
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("meets")
+    .select(
+      "id, host_id, title, description, lat, lng, notification_radius_meters, start_time, end_time, gallery_urls, recurrence, parent_meet_id, created_at, host:profiles!meets_host_id_fkey(id, username, avatar_url)"
+    )
+    .in("id", ids);
+  if (error) throw error;
+
+  return ((data ?? []) as unknown as MeetWithHostRow[]).map((row): MeetWithHost => ({
+    id: row.id,
+    host_id: row.host_id,
+    title: row.title,
+    description: row.description,
+    location: { lat: row.lat, lng: row.lng },
+    notification_radius_meters: row.notification_radius_meters,
+    start_time: row.start_time,
+    end_time: row.end_time,
+    gallery_urls: row.gallery_urls ?? [],
+    recurrence: row.recurrence,
+    parent_meet_id: row.parent_meet_id,
+    created_at: row.created_at,
+    host: row.host,
+  }));
 }
 
 export interface CreateMeetInput {
