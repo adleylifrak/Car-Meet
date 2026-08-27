@@ -10,7 +10,7 @@ import { LocationSearch } from "@/components/map/LocationSearch";
 import { PushOptInBanner } from "@/components/map/PushOptInBanner";
 import { MeetPreviewCard } from "@/components/map/MeetPreviewCard";
 import { useLocationSnapshot } from "@/components/map/useLocationSnapshot";
-import { getNearbyMeets } from "@/lib/data/meets";
+import { getMeetsByIds, getNearbyMeets } from "@/lib/data/meets";
 import { getCurrentProfileClient } from "@/lib/data/profiles";
 import { getMyMeetIds } from "@/lib/data/rsvps";
 import { getRsvpsForMeet } from "@/lib/data/rsvps";
@@ -47,7 +47,11 @@ export default function MapScreen() {
         getNearbyMeets({ lat: location.lat, lng: location.lng, radiusMeters }),
         profile ? getMyMeetIds(profile.id) : Promise.resolve<string[]>([]),
       ]);
-      setMeets(nearby);
+      const savedMeets = await getMeetsByIds(mine);
+      const merged = new Map(nearby.map((meet) => [meet.id, meet]));
+      savedMeets.forEach((meet) => merged.set(meet.id, meet));
+
+      setMeets(Array.from(merged.values()));
       setMyMeetIds(new Set(mine));
     } finally {
       setLoading(false);
@@ -91,10 +95,9 @@ export default function MapScreen() {
       const isMine = myMeetIds.has(meet.id);
       const ageDays = (now.getTime() - new Date(meet.end_time).getTime()) / 86_400_000;
 
-      // RSVP'd meets always stay on the map (never hidden by filter chips),
-      // as long as they're not so old the "past" window itself would drop them.
+      // RSVP'd meets always stay on the map, even when they're outside the
+      // current browse radius, past-window cutoff, or active filter chips.
       if (isMine) {
-        if (status === "past" && ageDays > PAST_WINDOW_DAYS) return false;
         return true;
       }
 

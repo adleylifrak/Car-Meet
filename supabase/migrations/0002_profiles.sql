@@ -15,7 +15,7 @@ alter table public.profiles
 alter table public.profiles enable row level security;
 
 -- Anyone signed in can read basic public profile info (host names, RSVP
--- lists, garages, badges, etc. all join through this).
+-- lists, garages, and profile surfaces all join through this).
 create policy "profiles are readable by authenticated users"
   on public.profiles for select
   to authenticated

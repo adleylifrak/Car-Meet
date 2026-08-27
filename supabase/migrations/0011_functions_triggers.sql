@@ -1,5 +1,5 @@
 -- ============================================================================
--- Check-in gate + meets_attended_count + badges
+-- Check-in gate + meets_attended_count
 -- ============================================================================
 
 -- The only gate on check-ins in v1: submitted_at must fall inside the meet's
@@ -31,40 +31,17 @@ create trigger enforce_checkin_window
   before insert on public.checkins
   for each row execute function public.enforce_checkin_window();
 
--- Awards any badge whose threshold a profile's meets_attended_count has
--- reached and doesn't already have. SECURITY DEFINER so it can write to
--- badges, which regular users have no insert policy for.
-create function public.award_badges(p_profile_id uuid, p_count integer)
-returns void
-language plpgsql
-security definer
-set search_path = public
-as $$
-begin
-  insert into public.badges (profile_id, badge_type)
-  select p_profile_id, t.badge_type
-  from (values ('5'), ('10'), ('25'), ('50'), ('100')) as t(badge_type)
-  where p_count >= (t.badge_type)::integer
-  on conflict (profile_id, badge_type) do nothing;
-end;
-$$;
-
--- After a valid check-in: bump the private attended count and re-check badges.
+-- After a valid check-in, bump the public social-proof counter.
 create function public.handle_new_checkin()
 returns trigger
 language plpgsql
 security definer
 set search_path = public
 as $$
-declare
-  new_count integer;
 begin
   update public.profiles
   set meets_attended_count = meets_attended_count + 1
-  where id = new.profile_id
-  returning meets_attended_count into new_count;
-
-  perform public.award_badges(new.profile_id, new_count);
+  where id = new.profile_id;
   return new;
 end;
 $$;
@@ -73,9 +50,7 @@ create trigger handle_new_checkin
   after insert on public.checkins
   for each row execute function public.handle_new_checkin();
 
--- Keep the count accurate if a checkin is removed (host removal or the
--- owner's own delete) — badges already earned are kept (they're a record of
--- a milestone once reached, not a live gauge).
+-- Keep the count accurate if a check-in is removed by its owner or host.
 create function public.handle_checkin_removed()
 returns trigger
 language plpgsql
