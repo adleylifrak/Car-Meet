@@ -94,7 +94,7 @@ export async function getMeetById(id: string): Promise<MeetWithHost | null> {
   const { data, error } = await supabase
     .from("meets")
     .select(
-      "id, host_id, title, description, lat, lng, notification_radius_meters, start_time, end_time, gallery_urls, recurrence, parent_meet_id, created_at, host:profiles!meets_host_id_fkey(id, username, avatar_url)"
+      "id, host_id, title, description, address, lat, lng, notification_radius_meters, start_time, end_time, gallery_urls, recurrence, parent_meet_id, created_at, host:profiles!meets_host_id_fkey(id, username, avatar_url)"
     )
     .eq("id", id)
     .maybeSingle();
@@ -211,6 +211,7 @@ export async function createMeet(input: CreateMeetInput): Promise<Meet> {
     host_id: data.host_id,
     title: data.title,
     description: data.description,
+    address: data.address,
     location: { lat: data.lat, lng: data.lng },
     notification_radius_meters: data.notification_radius_meters,
     start_time: data.start_time,
