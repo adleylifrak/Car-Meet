@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import { Lock, Unlock } from "lucide-react";
-import { smokingTireMarkupHtml } from "./pinMarkup";
+import { mapPinMarkupHtml } from "./pinMarkup";
 
 const hasMapbox = Boolean(process.env.NEXT_PUBLIC_MAPBOX_TOKEN);
 const PickerMapbox = dynamic(() => import("./LocationPickerMapbox"), { ssr: false });
@@ -30,7 +30,7 @@ export function LocationPicker({
       {locked && <div className="absolute inset-0 z-10 cursor-not-allowed" aria-hidden="true" />}
       <div
         className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center"
-        dangerouslySetInnerHTML={{ __html: smokingTireMarkupHtml("upcoming") }}
+        dangerouslySetInnerHTML={{ __html: mapPinMarkupHtml("upcoming") }}
       />
       <button
         type="button"
