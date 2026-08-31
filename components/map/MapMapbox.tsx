@@ -89,7 +89,7 @@ export default function MapMapbox({
           e.stopPropagation();
           onSelectMeet(meet.id);
         });
-        marker = new mapboxgl.Marker({ element: el })
+        marker = new mapboxgl.Marker({ element: el, anchor: "bottom" })
           .setLngLat([meet.location.lng, meet.location.lat])
           .addTo(map);
         markersRef.current.set(meet.id, marker);
