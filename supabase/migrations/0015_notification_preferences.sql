@@ -90,3 +90,30 @@ as $$
       coalesce(np.radius_meters, 32187)
     );
 $$;
+
+
+-- Subscribers receive RSVP activity for the selected meet regardless of distance.
+-- Global mute still overrides these per-meet subscriptions.
+create or replace function public.notify_meet_subscribers_of_rsvp()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into public.notifications (profile_id, type, actor_id, meet_id)
+  select mns.profile_id, 'new_rsvp', new.profile_id, new.meet_id
+  from public.meet_notification_subscriptions mns
+  join public.meets m on m.id = mns.meet_id
+  left join public.notification_preferences np on np.profile_id = mns.profile_id
+  where mns.meet_id = new.meet_id
+    and mns.profile_id <> new.profile_id
+    and mns.profile_id <> m.host_id
+    and not coalesce(np.muted, false);
+  return new;
+end;
+$$;
+
+create trigger notify_meet_subscribers_on_rsvp
+  after insert or update of status on public.rsvps
+  for each row execute function public.notify_meet_subscribers_of_rsvp();
