@@ -14,6 +14,7 @@ interface NearbyMeetRow {
   host_id: string;
   title: string;
   description: string | null;
+  address?: string | null;
   lat: number;
   lng: number;
   notification_radius_meters: number;
