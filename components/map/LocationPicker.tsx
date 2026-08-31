@@ -27,6 +27,7 @@ export function LocationPicker({
   return (
     <div className="relative -mx-4 h-72 w-[calc(100%+2rem)] overflow-hidden rounded-2xl border border-border sm:mx-0 sm:h-80 sm:w-full">
       {hasMapbox ? <PickerMapbox {...mapProps} /> : <PickerLeaflet {...mapProps} />}
+      {locked && <div className="absolute inset-0 z-10 cursor-not-allowed" aria-hidden="true" />}
       <div
         className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center"
         dangerouslySetInnerHTML={{ __html: smokingTireMarkupHtml("upcoming") }}
