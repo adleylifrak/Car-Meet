@@ -110,3 +110,22 @@ export async function getMyMeetIds(profileId: string): Promise<string[]> {
   if (error) throw error;
   return (data ?? []).map((r: { meet_id: string }) => r.meet_id);
 }
+
+
+/** Meet ids where the profile explicitly chose the Going RSVP status. */
+export async function getGoingMeetIds(profileId: string): Promise<string[]> {
+  if (!hasSupabaseConfig) {
+    return mockRsvps
+      .filter((r) => r.profile_id === profileId && r.status === "going")
+      .map((r) => r.meet_id);
+  }
+  const { createClient } = await import("@/lib/supabase/client");
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("rsvps")
+    .select("meet_id")
+    .eq("profile_id", profileId)
+    .eq("status", "going");
+  if (error) throw error;
+  return (data ?? []).map((r: { meet_id: string }) => r.meet_id);
+}

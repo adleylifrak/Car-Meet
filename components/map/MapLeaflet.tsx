@@ -99,7 +99,7 @@ export default function MapLeaflet({
         html: pinMarkupHtml(status, hasRsvp),
         className: "",
         iconSize: [44, 44],
-        iconAnchor: [22, 22],
+        iconAnchor: [22, 44],
       });
       let marker = markersRef.current.get(meet.id);
       if (marker) {

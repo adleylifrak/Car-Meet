@@ -12,7 +12,7 @@ import { MeetPreviewCard } from "@/components/map/MeetPreviewCard";
 import { useLocationSnapshot } from "@/components/map/useLocationSnapshot";
 import { getMeetsByIds, getNearbyMeets } from "@/lib/data/meets";
 import { getCurrentProfileClient } from "@/lib/data/profiles";
-import { getMyMeetIds } from "@/lib/data/rsvps";
+import { getGoingMeetIds, getMyMeetIds } from "@/lib/data/rsvps";
 import { getRsvpsForMeet } from "@/lib/data/rsvps";
 import { getMeetTimeStatus, type MeetWithHost, type Profile, type RsvpWithProfile } from "@/lib/types";
 import { milesToMeters } from "@/lib/geo";
@@ -26,6 +26,7 @@ export default function MapScreen() {
   const [filters, setFilters] = useState<Set<MeetFilter>>(new Set(["live", "upcoming"]));
   const [meets, setMeets] = useState<MeetWithHost[]>([]);
   const [myMeetIds, setMyMeetIds] = useState<Set<string>>(new Set());
+  const [goingMeetIds, setGoingMeetIds] = useState<Set<string>>(new Set());
   const [selectedMeetId, setSelectedMeetId] = useState<string | null>(null);
   const [selectedAttendees, setSelectedAttendees] = useState<RsvpWithProfile[]>([]);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -43,9 +44,10 @@ export default function MapScreen() {
   const refreshMeets = useCallback(async () => {
     setLoading(true);
     try {
-      const [nearby, mine] = await Promise.all([
+      const [nearby, mine, going] = await Promise.all([
         getNearbyMeets({ lat: location.lat, lng: location.lng, radiusMeters }),
         profile ? getMyMeetIds(profile.id) : Promise.resolve<string[]>([]),
+        profile ? getGoingMeetIds(profile.id) : Promise.resolve<string[]>([]),
       ]);
       const savedMeets = await getMeetsByIds(mine);
       const merged = new Map(nearby.map((meet) => [meet.id, meet]));
@@ -53,6 +55,7 @@ export default function MapScreen() {
 
       setMeets(Array.from(merged.values()));
       setMyMeetIds(new Set(mine));
+      setGoingMeetIds(new Set(going));
     } finally {
       setLoading(false);
     }
@@ -118,7 +121,7 @@ export default function MapScreen() {
         <MapView
           center={location}
           meets={visibleMeets}
-          rsvpMeetIds={myMeetIds}
+          rsvpMeetIds={goingMeetIds}
           selectedMeetId={selectedMeetId}
           onSelectMeet={setSelectedMeetId}
           radiusMeters={radiusMeters}
