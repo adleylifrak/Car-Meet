@@ -7,9 +7,14 @@ import type { LocationPickerProps } from "./LocationPicker";
 
 const TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
-export default function LocationPickerMapbox({ center, onChange }: LocationPickerProps) {
+export default function LocationPickerMapbox({ center, onChange, locked }: LocationPickerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
+  const lockedRef = useRef(locked);
+
+  useEffect(() => {
+    lockedRef.current = locked;
+  }, [locked]);
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current || !TOKEN) return;
@@ -22,6 +27,7 @@ export default function LocationPickerMapbox({ center, onChange }: LocationPicke
     });
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), "bottom-right");
     map.on("moveend", () => {
+      if (lockedRef.current) return;
       const c = map.getCenter();
       onChange({ lat: c.lat, lng: c.lng });
     });
@@ -41,6 +47,21 @@ export default function LocationPickerMapbox({ center, onChange }: LocationPicke
       map.jumpTo({ center: [center.lng, center.lat] });
     }
   }, [center]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const handlers = [
+      map.boxZoom,
+      map.doubleClickZoom,
+      map.dragPan,
+      map.dragRotate,
+      map.keyboard,
+      map.scrollZoom,
+      map.touchZoomRotate,
+    ];
+    handlers.forEach((handler) => locked ? handler.disable() : handler.enable());
+  }, [locked]);
 
   if (!TOKEN) return null;
   return <div ref={containerRef} className="relative z-0 h-full w-full" />;
