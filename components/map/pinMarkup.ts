@@ -7,13 +7,13 @@ const statusColor: Record<MeetTimeStatus, string> = {
 };
 
 /** Filled teardrop marker shared by Mapbox, Leaflet, and the pin picker.
- * An RSVP always wins over time status so meets the user is attending are green. */
+ * Live and past status take priority. Green is reserved for upcoming meets the user is attending. */
 export function mapPinMarkupHtml(
   status: MeetTimeStatus = "upcoming",
   hasRsvp = false
 ): string {
-  const color = hasRsvp ? "#22c55e" : statusColor[status];
-  const liveClass = status === "live" && !hasRsvp ? " pin-live" : "";
+  const color = status === "upcoming" && hasRsvp ? "#22c55e" : statusColor[status];
+  const liveClass = status === "live" ? " pin-live" : "";
 
   return `
     <div class="h-11 w-11" aria-hidden="true">
