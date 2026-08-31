@@ -10,12 +10,13 @@ import { LocationSearch } from "@/components/map/LocationSearch";
 import { PushOptInBanner } from "@/components/map/PushOptInBanner";
 import { MeetPreviewCard } from "@/components/map/MeetPreviewCard";
 import { useLocationSnapshot } from "@/components/map/useLocationSnapshot";
-import { getMeetsByIds, getNearbyMeets } from "@/lib/data/meets";
+import { getAllMeets } from "@/lib/data/meets";
 import { getCurrentProfileClient } from "@/lib/data/profiles";
 import { getGoingMeetIds, getMyMeetIds } from "@/lib/data/rsvps";
 import { getRsvpsForMeet } from "@/lib/data/rsvps";
 import { getMeetTimeStatus, type MeetWithHost, type Profile, type RsvpWithProfile } from "@/lib/types";
 import { milesToMeters } from "@/lib/geo";
+import { getNotificationPreferences, setNotificationPreferences } from "@/lib/data/notifications";
 
 const PAST_WINDOW_DAYS = 30;
 const DEFAULT_RADIUS_METERS = milesToMeters(20);
@@ -23,6 +24,7 @@ const DEFAULT_RADIUS_METERS = milesToMeters(20);
 export default function MapScreen() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [radiusMeters, setRadiusMeters] = useState(DEFAULT_RADIUS_METERS);
+  const [notificationsMuted, setNotificationsMuted] = useState(false);
   const [filters, setFilters] = useState<Set<MeetFilter>>(new Set(["live", "upcoming"]));
   const [meets, setMeets] = useState<MeetWithHost[]>([]);
   const [myMeetIds, setMyMeetIds] = useState<Set<string>>(new Set());
@@ -33,7 +35,14 @@ export default function MapScreen() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getCurrentProfileClient().then(setProfile);
+    getCurrentProfileClient().then(async (currentProfile) => {
+      setProfile(currentProfile);
+      if (currentProfile) {
+        const preferences = await getNotificationPreferences(currentProfile.id);
+        setRadiusMeters(preferences.radiusMeters);
+        setNotificationsMuted(preferences.muted);
+      }
+    });
   }, []);
 
   const { location, setManualLocation } = useLocationSnapshot(
@@ -44,22 +53,18 @@ export default function MapScreen() {
   const refreshMeets = useCallback(async () => {
     setLoading(true);
     try {
-      const [nearby, mine, going] = await Promise.all([
-        getNearbyMeets({ lat: location.lat, lng: location.lng, radiusMeters }),
+      const [allMeets, mine, going] = await Promise.all([
+        getAllMeets(),
         profile ? getMyMeetIds(profile.id) : Promise.resolve<string[]>([]),
         profile ? getGoingMeetIds(profile.id) : Promise.resolve<string[]>([]),
       ]);
-      const savedMeets = await getMeetsByIds(mine);
-      const merged = new Map(nearby.map((meet) => [meet.id, meet]));
-      savedMeets.forEach((meet) => merged.set(meet.id, meet));
-
-      setMeets(Array.from(merged.values()));
+      setMeets(allMeets);
       setMyMeetIds(new Set(mine));
       setGoingMeetIds(new Set(going));
     } finally {
       setLoading(false);
     }
-  }, [location.lat, location.lng, radiusMeters, profile]);
+  }, [profile]);
 
   useEffect(() => {
     // Deferred via queueMicrotask so the data fetch's state updates land
@@ -124,7 +129,7 @@ export default function MapScreen() {
           rsvpMeetIds={goingMeetIds}
           selectedMeetId={selectedMeetId}
           onSelectMeet={setSelectedMeetId}
-          radiusMeters={radiusMeters}
+          radiusMeters={notificationsMuted ? 0 : radiusMeters}
         />
       </div>
 
@@ -138,7 +143,17 @@ export default function MapScreen() {
             <Search size={16} />
             {location.label ?? "Search a location"}
           </button>
-          <RadiusControl radiusMeters={radiusMeters} onChange={setRadiusMeters} />
+          <RadiusControl
+            radiusMeters={radiusMeters}
+            muted={notificationsMuted}
+            onApply={(nextRadius, muted) => {
+              setRadiusMeters(nextRadius);
+              setNotificationsMuted(muted);
+              if (profile) {
+                setNotificationPreferences(profile.id, { radiusMeters: nextRadius, muted });
+              }
+            }}
+          />
         </div>
         <div className="pointer-events-auto w-fit max-w-full rounded-2xl border border-border bg-surface/95 shadow-sm backdrop-blur">
           <FilterChips active={filters} onToggle={toggleFilter} />
