@@ -21,7 +21,7 @@ function messageFor(n: AppNotification, actor?: Profile | null) {
     case "new_follower":
       return `${who} started following you`;
     case "new_rsvp":
-      return `${who} RSVP'd to a meet you're hosting`;
+      return `${who} RSVP'd to a meet you're following`;
     case "new_meet_nearby":
       return `${who} posted a new meet near you`;
   }
