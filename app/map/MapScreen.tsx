@@ -137,7 +137,7 @@ export default function MapScreen() {
           </button>
           <RadiusControl radiusMeters={radiusMeters} onChange={setRadiusMeters} />
         </div>
-        <div className="pointer-events-auto rounded-2xl border border-border bg-surface/95 shadow-sm backdrop-blur">
+        <div className="pointer-events-auto w-fit max-w-full rounded-2xl border border-border bg-surface/95 shadow-sm backdrop-blur">
           <FilterChips active={filters} onToggle={toggleFilter} />
         </div>
         {profile && <PushOptInBanner profileId={profile.id} />}
