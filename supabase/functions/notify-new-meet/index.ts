@@ -48,14 +48,13 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-    // Everyone with a location snapshot within the meet's notification
-    // radius gets an in-app notification...
+    // Each recipient chooses their own notification distance. Muted profiles
+    // are excluded by the database function.
     const { data: nearbyProfiles, error: nearbyErr } = await supabase.rpc(
-      "nearby_profile_ids",
+      "profiles_to_notify_for_meet",
       {
         center_lat: meet.lat,
         center_lng: meet.lng,
-        radius_m: meet.notification_radius_meters,
         exclude_profile_id: meet.host_id,
       }
     );
@@ -72,14 +71,12 @@ Deno.serve(async (req) => {
       );
     }
 
-    // ...and everyone with a push subscription in range gets a real push,
-    // since the whole point is reaching people who don't have the app open.
+    // Apply the same recipient-owned distance and mute preference to push.
     const { data: subscribers, error: subErr } = await supabase.rpc(
-      "nearby_subscribers",
+      "subscribers_to_notify_for_meet",
       {
         center_lat: meet.lat,
         center_lng: meet.lng,
-        radius_m: meet.notification_radius_meters,
         exclude_profile_id: meet.host_id,
       }
     );
