@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { ImagePicker } from "@/components/ui/ImagePicker";
@@ -26,6 +26,7 @@ export function MeetForm({
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [address, setAddress] = useState("");
   const [location, setLocation] = useState(initialCenter);
   const [gallery, setGallery] = useState<string[]>([]);
   const [radiusMi, setRadiusMi] = useState(15);
@@ -35,6 +36,10 @@ export function MeetForm({
   const [endTime, setEndTime] = useState(() => toLocalInputValue(new Date(Date.now() + 4 * 3600_000)));
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLocation(initialCenter);
+  }, [initialCenter]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -50,6 +55,7 @@ export function MeetForm({
         hostId,
         title: title.trim(),
         description: description.trim(),
+        address: address.trim() || null,
         lat: location.lat,
         lng: location.lng,
         notificationRadiusMeters: milesToMeters(radiusMi),
@@ -85,6 +91,17 @@ export function MeetForm({
           onChange={(e) => setDescription(e.target.value)}
           rows={3}
           placeholder="Parking, entry point, layout, any ground rules…"
+          className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm outline-none focus:border-accent"
+        />
+      </div>
+
+      <div>
+        <label className="mb-1.5 block text-sm font-medium">Address <span className="font-normal text-muted">(optional)</span></label>
+        <input
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          placeholder="Street address or meeting-point instructions"
+          autoComplete="street-address"
           className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm outline-none focus:border-accent"
         />
       </div>
