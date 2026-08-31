@@ -1,18 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f7f8;
+  --background: #ffffff;
   --surface: #ffffff;
-  --surface-raised: #ffffff;
-  --border: #e5e5e8;
-  --foreground: #16161a;
-  --muted: #6b6b74;
-  --accent: #ff5a1f;
+  --surface-raised: #f3f7fb;
+  --border: #d6e2ee;
+  --foreground: #0b1f33;
+  --muted: #5e7184;
+  --accent: #004080;
   --accent-foreground: #ffffff;
   --live: #22c55e;
-  --past: #a3a3ac;
+  --past: #64748b;
   --danger: #ef4444;
-  --ring: #ff5a1f;
+  --ring: #004080;
 }
 
 @theme inline {
@@ -29,23 +29,6 @@
   --color-danger: var(--danger);
   --color-ring: var(--ring);
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0c0c0e;
-    --surface: #17171a;
-    --surface-raised: #1f1f23;
-    --border: #2a2a2f;
-    --foreground: #f2f2f4;
-    --muted: #97979f;
-    --accent: #ff6a35;
-    --accent-foreground: #0c0c0e;
-    --live: #34d399;
-    --past: #5c5c66;
-    --danger: #f87171;
-    --ring: #ff6a35;
-  }
 }
 
 * {
@@ -70,13 +53,13 @@ body {
 /* Pulsing animation for "live now" map pins */
 @keyframes pin-pulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.55);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.55);
   }
   70% {
-    box-shadow: 0 0 0 14px rgba(34, 197, 94, 0);
+    box-shadow: 0 0 0 14px rgba(239, 68, 68, 0);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
   }
 }
 .pin-live {
