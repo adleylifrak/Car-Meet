@@ -1,42 +1,34 @@
 import type { MeetTimeStatus } from "@/lib/types";
 
 const statusColor: Record<MeetTimeStatus, string> = {
-  live: "#22c55e",
-  upcoming: "#ff5a1f",
-  past: "#73737d",
+  past: "#17171a",
+  live: "#ef4444",
+  upcoming: "#3b82f6",
 };
 
-/** A smoking tire marker shared by Mapbox, Leaflet, and the pin picker. */
-export function smokingTireMarkupHtml(
+/** Filled teardrop marker shared by Mapbox, Leaflet, and the pin picker.
+ * An RSVP always wins over time status so meets the user is attending are green. */
+export function mapPinMarkupHtml(
   status: MeetTimeStatus = "upcoming",
   hasRsvp = false
 ): string {
-  const color = statusColor[status];
-  const checkmark = hasRsvp
-    ? `<span class="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-white text-[9px] font-bold text-live shadow ring-1 ring-live">✓</span>`
-    : "";
-  const liveClass = status === "live" ? " pin-live" : "";
-  const opacity = status === "past" ? " opacity-60" : "";
+  const color = hasRsvp ? "#22c55e" : statusColor[status];
+  const liveClass = status === "live" && !hasRsvp ? " pin-live" : "";
 
   return `
-    <div class="relative h-11 w-11${opacity}" aria-hidden="true">
+    <div class="h-11 w-11" aria-hidden="true">
       <svg viewBox="0 0 48 48" class="h-11 w-11 overflow-visible drop-shadow-lg${liveClass}">
-        <g fill="#d1d5db" opacity="0.9">
-          <circle cx="35" cy="10" r="4.5"/>
-          <circle cx="40.5" cy="6.5" r="3"/>
-          <circle cx="42" cy="13.5" r="2.5"/>
-        </g>
-        <g transform="rotate(-18 23 27)">
-          <circle cx="23" cy="27" r="15" fill="#17171a" stroke="white" stroke-width="2"/>
-          <circle cx="23" cy="27" r="10.5" fill="none" stroke="#3f3f46" stroke-width="3" stroke-dasharray="3 3"/>
-          <circle cx="23" cy="27" r="6" fill="${color}" stroke="white" stroke-width="1.5"/>
-          <circle cx="23" cy="27" r="2" fill="white"/>
-        </g>
+        <path
+          fill="${color}"
+          stroke="white"
+          stroke-width="1.5"
+          d="M24 2C14.06 2 6 10.06 6 20c0 12.9 18 26 18 26s18-13.1 18-26C42 10.06 33.94 2 24 2Z"
+        />
+        <circle cx="24" cy="20" r="7.5" fill="white" />
       </svg>
-      ${checkmark}
     </div>`;
 }
 
 export function pinMarkupHtml(status: MeetTimeStatus, hasRsvp: boolean): string {
-  return smokingTireMarkupHtml(status, hasRsvp);
+  return mapPinMarkupHtml(status, hasRsvp);
 }
