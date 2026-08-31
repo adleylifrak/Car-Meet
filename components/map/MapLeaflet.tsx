@@ -73,9 +73,9 @@ export default function MapLeaflet({
     if (circleRef.current) circleRef.current.remove();
     circleRef.current = L.circle([center.lat, center.lng], {
       radius: radiusMeters,
-      color: "#ff5a1f",
+      color: "#004080",
       weight: 1.5,
-      fillColor: "#ff5a1f",
+      fillColor: "#004080",
       fillOpacity: 0.06,
     }).addTo(map);
   }, [center.lat, center.lng, radiusMeters]);
