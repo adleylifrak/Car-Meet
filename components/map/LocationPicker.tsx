@@ -16,10 +16,10 @@ export interface LocationPickerProps {
  * the center of the frame and the map moves under it, Uber-pickup style. */
 export function LocationPicker(props: LocationPickerProps) {
   return (
-    <div className="relative h-56 w-full overflow-hidden rounded-2xl border border-border">
+    <div className="relative -mx-4 h-72 w-[calc(100%+2rem)] overflow-hidden rounded-2xl border border-border sm:mx-0 sm:h-80 sm:w-full">
       {hasMapbox ? <PickerMapbox {...props} /> : <PickerLeaflet {...props} />}
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <MapPin size={36} className="-mt-9 fill-accent text-accent drop-shadow" />
+      <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center">
+        <MapPin size={36} className="-mt-9 fill-accent text-accent drop-shadow-lg" />
       </div>
     </div>
   );
