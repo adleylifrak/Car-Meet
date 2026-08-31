@@ -42,3 +42,84 @@ export async function markAllNotificationsRead(profileId: string): Promise<void>
   const supabase = createClient();
   await supabase.from("notifications").update({ read: true }).eq("profile_id", profileId).eq("read", false);
 }
+
+export interface NotificationPreferences {
+  radiusMeters: number;
+  muted: boolean;
+}
+
+const mockPreferences = new Map<string, NotificationPreferences>();
+const mockMeetSubscriptions = new Set<string>();
+
+export async function getNotificationPreferences(profileId: string): Promise<NotificationPreferences> {
+  if (!hasSupabaseConfig) {
+    return mockPreferences.get(profileId) ?? { radiusMeters: 32186.88, muted: false };
+  }
+  const { createClient } = await import("@/lib/supabase/client");
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("notification_preferences")
+    .select("radius_meters, muted")
+    .eq("profile_id", profileId)
+    .maybeSingle();
+  if (error) throw error;
+  return {
+    radiusMeters: data?.radius_meters ?? 32186.88,
+    muted: data?.muted ?? false,
+  };
+}
+
+export async function setNotificationPreferences(
+  profileId: string,
+  preferences: NotificationPreferences
+): Promise<void> {
+  if (!hasSupabaseConfig) {
+    mockPreferences.set(profileId, preferences);
+    return;
+  }
+  const { createClient } = await import("@/lib/supabase/client");
+  const supabase = createClient();
+  const { error } = await supabase.from("notification_preferences").upsert({
+    profile_id: profileId,
+    radius_meters: Math.round(preferences.radiusMeters),
+    muted: preferences.muted,
+    updated_at: new Date().toISOString(),
+  });
+  if (error) throw error;
+}
+
+export async function getMeetNotificationEnabled(
+  profileId: string,
+  meetId: string
+): Promise<boolean> {
+  if (!hasSupabaseConfig) return mockMeetSubscriptions.has(`${profileId}:${meetId}`);
+  const { createClient } = await import("@/lib/supabase/client");
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("meet_notification_subscriptions")
+    .select("meet_id")
+    .eq("profile_id", profileId)
+    .eq("meet_id", meetId)
+    .maybeSingle();
+  if (error) throw error;
+  return Boolean(data);
+}
+
+export async function setMeetNotificationEnabled(
+  profileId: string,
+  meetId: string,
+  enabled: boolean
+): Promise<void> {
+  const key = `${profileId}:${meetId}`;
+  if (!hasSupabaseConfig) {
+    enabled ? mockMeetSubscriptions.add(key) : mockMeetSubscriptions.delete(key);
+    return;
+  }
+  const { createClient } = await import("@/lib/supabase/client");
+  const supabase = createClient();
+  const query = supabase.from("meet_notification_subscriptions");
+  const { error } = enabled
+    ? await query.upsert({ profile_id: profileId, meet_id: meetId })
+    : await query.delete().eq("profile_id", profileId).eq("meet_id", meetId);
+  if (error) throw error;
+}
