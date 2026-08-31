@@ -98,8 +98,8 @@ export default function MapLeaflet({
       const icon = L.divIcon({
         html: pinMarkupHtml(status, hasRsvp),
         className: "",
-        iconSize: [32, 32],
-        iconAnchor: [16, 16],
+        iconSize: [44, 44],
+        iconAnchor: [22, 22],
       });
       let marker = markersRef.current.get(meet.id);
       if (marker) {
