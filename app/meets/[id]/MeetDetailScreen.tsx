@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { MapPin, MoreVertical, Repeat } from "lucide-react";
+import { Bell, BellRing, MapPin, MoreVertical, Repeat } from "lucide-react";
 import { TopBar } from "@/components/layout/TopBar";
 import { Avatar } from "@/components/ui/Avatar";
 import { Card } from "@/components/ui/Card";
@@ -17,6 +17,7 @@ import { getCollageForMeet } from "@/lib/data/checkins";
 import { getCurrentProfileClient } from "@/lib/data/profiles";
 import { getMeetTimeStatus, type MeetWithHost, type Profile, type RsvpWithProfile, type CheckinWithProfile } from "@/lib/types";
 import { formatMeetTime } from "@/lib/utils";
+import { getMeetNotificationEnabled, setMeetNotificationEnabled } from "@/lib/data/notifications";
 
 const statusLabel = { live: "Live now", upcoming: "Upcoming", past: "Past" } as const;
 const statusClass = { live: "bg-live text-white", upcoming: "bg-accent text-accent-foreground", past: "bg-past text-white" } as const;
@@ -27,6 +28,7 @@ export default function MeetDetailScreen({ meetId }: { meetId: string }) {
   const [collage, setCollage] = useState<CheckinWithProfile[]>([]);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [reportOpen, setReportOpen] = useState(false);
+  const [meetNotifications, setMeetNotifications] = useState(false);
 
   const load = useCallback(async () => {
     const [m, rsvps, checkins] = await Promise.all([
@@ -42,7 +44,12 @@ export default function MeetDetailScreen({ meetId }: { meetId: string }) {
   useEffect(() => {
     queueMicrotask(() => {
       load();
-      getCurrentProfileClient().then(setProfile);
+      getCurrentProfileClient().then(async (currentProfile) => {
+        setProfile(currentProfile);
+        if (currentProfile) {
+          setMeetNotifications(await getMeetNotificationEnabled(currentProfile.id, meetId));
+        }
+      });
     });
   }, [load]);
 
@@ -125,6 +132,33 @@ export default function MeetDetailScreen({ meetId }: { meetId: string }) {
               ))}
             </div>
           </div>
+        )}
+
+        {profile && (
+          <Card className="flex items-center gap-3 p-4">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-raised text-accent">
+              {meetNotifications ? <BellRing size={19} /> : <Bell size={19} />}
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold">All notifications from this meet</p>
+              <p className="text-xs text-muted">Get updates and activity alerts specifically for this meet.</p>
+            </div>
+            <button
+              type="button"
+              onClick={async () => {
+                const enabled = !meetNotifications;
+                setMeetNotifications(enabled);
+                await setMeetNotificationEnabled(profile.id, meet.id, enabled);
+              }}
+              className={`rounded-full px-3 py-1.5 text-xs font-semibold ${meetNotifications
+                ? "bg-live text-white"
+                : "border border-border bg-surface"
+              }`}
+              aria-pressed={meetNotifications}
+            >
+              {meetNotifications ? "On" : "Enable"}
+            </button>
+          </Card>
         )}
 
         {profile && (
