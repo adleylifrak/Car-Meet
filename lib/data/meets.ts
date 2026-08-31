@@ -41,6 +41,39 @@ function toMeetWithHost(meet: Meet): MeetWithHost {
   };
 }
 
+
+/** Returns every meet for global map discovery. Time/status filters stay client-side. */
+export async function getAllMeets(): Promise<MeetWithHost[]> {
+  if (!hasSupabaseConfig) return mockMeets.map(toMeetWithHost);
+
+  const { createClient } = await import("@/lib/supabase/client");
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("meets")
+    .select(
+      "id, host_id, title, description, address, lat, lng, notification_radius_meters, start_time, end_time, gallery_urls, recurrence, parent_meet_id, created_at, host:profiles!meets_host_id_fkey(id, username, avatar_url)"
+    )
+    .order("start_time", { ascending: true });
+  if (error) throw error;
+
+  return ((data ?? []) as unknown as MeetWithHostRow[]).map((row): MeetWithHost => ({
+    id: row.id,
+    host_id: row.host_id,
+    title: row.title,
+    description: row.description,
+    address: row.address,
+    location: { lat: row.lat, lng: row.lng },
+    notification_radius_meters: row.notification_radius_meters,
+    start_time: row.start_time,
+    end_time: row.end_time,
+    gallery_urls: row.gallery_urls ?? [],
+    recurrence: row.recurrence,
+    parent_meet_id: row.parent_meet_id,
+    created_at: row.created_at,
+    host: row.host,
+  }));
+}
+
 /** All meets within `radiusMeters` of (lat, lng). Backed by the `nearby_meets`
  * Postgres RPC (see supabase/migrations) so PostGIS does the distance math. */
 export async function getNearbyMeets({
