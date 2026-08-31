@@ -18,7 +18,6 @@ import { getMeetTimeStatus, type MeetWithHost, type Profile, type RsvpWithProfil
 import { milesToMeters } from "@/lib/geo";
 import { getNotificationPreferences, setNotificationPreferences } from "@/lib/data/notifications";
 
-const PAST_WINDOW_DAYS = 30;
 const DEFAULT_RADIUS_METERS = milesToMeters(20);
 
 export default function MapScreen() {
@@ -101,15 +100,12 @@ export default function MapScreen() {
     return meets.filter((meet) => {
       const status = getMeetTimeStatus(meet, now);
       const isMine = myMeetIds.has(meet.id);
-      const ageDays = (now.getTime() - new Date(meet.end_time).getTime()) / 86_400_000;
 
-      // RSVP'd meets always stay on the map, even when they're outside the
-      // current browse radius, past-window cutoff, or active filter chips.
+      // RSVP'd meets always stay visible regardless of active filter chips.
       if (isMine) {
         return true;
       }
 
-      if (status === "past" && ageDays > PAST_WINDOW_DAYS) return false;
       if (filters.has("going") && !isMine) return false;
       if (!filters.has("going") && !filters.has(status)) return false;
       return true;
