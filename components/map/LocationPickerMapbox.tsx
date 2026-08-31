@@ -33,6 +33,15 @@ export default function LocationPickerMapbox({ center, onChange }: LocationPicke
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const current = map.getCenter();
+    if (Math.abs(current.lat - center.lat) > 0.000001 || Math.abs(current.lng - center.lng) > 0.000001) {
+      map.jumpTo({ center: [center.lng, center.lat] });
+    }
+  }, [center]);
+
   if (!TOKEN) return null;
-  return <div ref={containerRef} className="h-full w-full" />;
+  return <div ref={containerRef} className="relative z-0 h-full w-full" />;
 }

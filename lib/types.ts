@@ -47,6 +47,7 @@ export interface Meet {
   host_id: string;
   title: string;
   description: string | null;
+  address?: string | null;
   location: { lat: number; lng: number };
   notification_radius_meters: number;
   start_time: string;
