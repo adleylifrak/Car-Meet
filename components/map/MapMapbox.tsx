@@ -42,13 +42,13 @@ export default function MapMapbox({
         id: "user-radius-fill",
         type: "fill",
         source: "user-radius",
-        paint: { "fill-color": "#ff5a1f", "fill-opacity": 0.06 },
+        paint: { "fill-color": "#004080", "fill-opacity": 0.06 },
       });
       map.addLayer({
         id: "user-radius-line",
         type: "line",
         source: "user-radius",
-        paint: { "line-color": "#ff5a1f", "line-width": 1.5 },
+        paint: { "line-color": "#004080", "line-width": 1.5 },
       });
 
       new mapboxgl.Marker({ color: "#3b82f6" }).setLngLat([center.lng, center.lat]).addTo(map);
