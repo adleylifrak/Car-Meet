@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { MoreVertical, Repeat } from "lucide-react";
+import { MapPin, MoreVertical, Repeat } from "lucide-react";
 import { TopBar } from "@/components/layout/TopBar";
 import { Avatar } from "@/components/ui/Avatar";
 import { Card } from "@/components/ui/Card";
@@ -102,6 +102,13 @@ export default function MeetDetailScreen({ meetId }: { meetId: string }) {
             <span className="font-medium">{meet.host.username}</span>
           </div>
         </Link>
+
+        {meet.address && (
+          <p className="flex items-start gap-2 text-sm text-muted">
+            <MapPin size={16} className="mt-0.5 shrink-0 text-accent" />
+            <span>{meet.address}</span>
+          </p>
+        )}
 
         {meet.description && <p className="text-sm leading-relaxed">{meet.description}</p>}
 
