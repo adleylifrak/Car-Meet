@@ -29,6 +29,9 @@ export default function MapMapbox({
       style: "mapbox://styles/mapbox/streets-v12",
       center: [center.lng, center.lat],
       zoom: 11,
+      minZoom: 1,
+      maxBounds: [[-180, -85.051129], [180, 85.051129]],
+      renderWorldCopies: false,
       attributionControl: true,
     });
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), "bottom-right");
