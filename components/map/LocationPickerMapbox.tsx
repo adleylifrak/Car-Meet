@@ -24,6 +24,9 @@ export default function LocationPickerMapbox({ center, onChange, locked }: Locat
       style: "mapbox://styles/mapbox/streets-v12",
       center: [center.lng, center.lat],
       zoom: 14,
+      minZoom: 1,
+      maxBounds: [[-180, -85.051129], [180, 85.051129]],
+      renderWorldCopies: false,
     });
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), "bottom-right");
     map.on("moveend", () => {
