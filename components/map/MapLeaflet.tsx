@@ -31,11 +31,17 @@ export default function MapLeaflet({
     const map = L.map(containerRef.current, {
       center: [center.lat, center.lng],
       zoom: 11,
+      minZoom: 1,
+      maxBounds: [[-85.051129, -180], [85.051129, 180]],
+      maxBoundsViscosity: 1,
       zoomControl: false,
       attributionControl: true,
     });
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
+      minZoom: 1,
+      noWrap: true,
+      bounds: [[-85.051129, -180], [85.051129, 180]],
       attribution: "&copy; OpenStreetMap contributors",
     }).addTo(map);
     L.control.zoom({ position: "bottomright" }).addTo(map);
